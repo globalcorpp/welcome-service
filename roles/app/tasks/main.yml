@@ -1,0 +1,43 @@
+---
+    - name: Render and upload PHP config file
+      ansible.builtin.template:
+        src: config.php.j2
+        dest: "{{ web_root }}/config.php"
+        owner: apache
+        group: apache
+        mode: '0644'
+
+    - name: Upload the PHP script to the web root
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ web_root }}/{{ item }}"
+        owner: apache
+        group: apache
+        mode: '0644'
+      loop: "{{ upload_files }}"
+
+    - name: Set SELinux context for the PHP script
+      # This is crucial for Rocky Linux/RHEL to allow Apache to execute the file
+      ansible.builtin.command: 
+        cmd: "chcon -t httpd_sys_content_t {{ web_root }}/{{ script_name }}"
+      # Ignore errors just in case SELinux is disabled or the command is not available
+
+    - name: Allow Apache to make network connections (SELinux Fix via command)
+      # Replaced ansible.posix.selinux_boolean with a command to avoid the missing collection error.
+      # The '-P' flag ensures the change is persistent across reboots.
+      ansible.builtin.command:
+        cmd: "/usr/sbin/setsebool -P httpd_can_network_connect on"
+      changed_when: true
+
+    - name: Test the endpoint using curl and capture the JSON output
+      # Execute the curl command on the Ansible control node to retrieve the data
+      ansible.builtin.uri:
+        url: "{{ target_url }}"
+        method: GET
+        return_content: true
+        status_code: 200
+      register: api_response
+
+    - name: Display the retrieved JSON data
+      ansible.builtin.debug:
+        msg: "Retrieved Data:\n{{ api_response.content }}"

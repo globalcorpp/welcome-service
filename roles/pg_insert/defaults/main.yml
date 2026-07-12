@@ -1,0 +1,10 @@
+---
+# Connection Params
+db_host: 127.0.0.1
+db_user_rw: "gd"
+db_pass_rw: "a@1234"
+
+# DB Params
+target_db_name: "{{ global_pg_dbname }}"
+target_table_name: gd_data
+base_description_text: 'Automatically inserted row '

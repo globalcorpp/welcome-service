@@ -1,0 +1,90 @@
+# 1. User Creation
+- name: Ensure Read/Write and Read-Only Users are Created
+  community.postgresql.postgresql_user:
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    login_user: "{{ global_pg_superuser }}"
+    login_password: "{{ global_pg_superuser_password }}"
+    user: "{{ item.name }}"
+    password: "{{ item.password }}"
+    role_attr_flags: "NOCREATEDB,NOSUPERUSER"
+    state: present
+  loop:
+    - { name: "gd", password: "a@1234" }
+    - { name: "gd-view", password: "a@1234view" }
+
+# 2a. Grant CONNECT Privilege on Database (Database-level grant)
+- name: Grant CONNECT Privilege on Database
+  community.postgresql.postgresql_privs:
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    login_user: "{{ global_pg_superuser }}"
+    login_password: "{{ global_pg_superuser_password }}"
+    login_db: "{{ global_pg_dbname }}"
+    role: "{{ item }}"
+    privs: CONNECT
+    type: database
+    state: present
+  loop:
+    - gd
+    - gd-view
+
+# 2b. Grant USAGE/CREATE on 'public' Schema (Schema-level grant)
+- name: Grant USAGE/CREATE on 'public' Schema
+  community.postgresql.postgresql_privs:
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    login_user: "{{ global_pg_superuser }}"
+    login_password: "{{ global_pg_superuser_password }}"
+    login_db: "{{ global_pg_dbname }}"
+    role: "{{ item.role }}"
+    type: schema
+    objs: public
+    privs: "{{ item.privs }}"
+    state: present
+  loop:
+    # RW User: needs USAGE and CREATE
+    - { role: "gd", privs: "USAGE,CREATE" }
+    # RO User: needs only USAGE
+    - { role: "gd-view", privs: "USAGE" }
+
+# 3. Grant Privileges on EXISTING Objects
+- name: Grant Privileges on EXISTING Objects
+  community.postgresql.postgresql_privs:
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    login_user: "{{ global_pg_superuser}}"
+    login_password: "{{ global_pg_superuser_password }}"
+    login_db: "{{ global_pg_dbname }}"
+    objs: ALL_IN_SCHEMA
+    schema: public
+    type: "{{ item.type }}"
+    privs: "{{ item.privs }}"
+    role: "{{ item.role }}"
+    state: present
+  loop:
+    - { role: "gd", privs: "ALL", type: "table" }
+    - { role: "gd", privs: "ALL", type: "sequence" }
+    - { role: "gd-view", privs: "SELECT", type: "table" }
+
+# 4. Set DEFAULT Privileges for FUTURE Objects
+- name: Set DEFAULT Privileges for FUTURE Objects
+  community.postgresql.postgresql_privs:
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    login_user: "{{ global_pg_superuser }}"
+    login_password: "{{ global_pg_superuser_password }}"
+    login_db: "{{ global_pg_dbname }}"
+    schema: public
+    type: default_privs
+    # Plural names (tables, sequences) are required here
+    objs: "{{ item.objs }}" 
+    privs: "{{ item.privs }}"
+    role: "{{ item.grantee_role }}"
+    target_roles: gd
+    state: present
+  loop:
+    - { grantee_role: "gd", privs: "ALL", objs: "tables" }
+    - { grantee_role: "gd", privs: "ALL", objs: "sequences" }
+    - { grantee_role: "gd-view", privs: "SELECT", objs: "tables" }
+    - { grantee_role: "gd-view", privs: "SELECT", objs: "sequences" }

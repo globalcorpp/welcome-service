@@ -1,0 +1,8 @@
+pg_host: "127.0.0.1"
+pg_user_ro: "gameduell-view"
+pg_password_ro: "a@1234view"
+web_root: "/var/www/html"
+script_name: "get_data.php"
+target_url: "http://{{ ansible_host }}/{{ script_name }}"
+upload_files:
+  - get_data.php

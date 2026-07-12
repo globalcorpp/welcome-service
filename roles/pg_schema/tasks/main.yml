@@ -1,0 +1,40 @@
+---
+- name: Ensure Target Database Exists
+  community.postgresql.postgresql_db:
+    name: "{{ target_db_name }}"
+    login_user: "{{ db_user_rw }}"
+    login_password: "{{ db_pass_rw }}"
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    state: present
+
+- name: Check if Target Table Already Exists
+  community.postgresql.postgresql_query:
+    login_db: "{{ target_db_name }}"
+    login_user: "{{ db_user_rw }}"
+    login_password: "{{ db_pass_rw }}"
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    query: "SELECT count(*) FROM pg_tables WHERE schemaname = 'public' AND tablename = '{{ target_table_name }}';"
+  register: table_exists_check
+
+- name: Create Target Table if it Does Not Exist
+  community.postgresql.postgresql_query:
+    login_db: "{{ target_db_name }}"
+    login_user: "{{ db_user_rw }}"
+    login_password: "{{ db_pass_rw }}"
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    query: |
+      CREATE TABLE {{ target_table_name }} (
+        id SERIAL PRIMARY KEY,
+        description JSONB NOT NULL DEFAULT '{}'
+      );
+  register: table_creation_status
+  # This task runs ONLY if the count from Task 1 was 0.
+  when: table_exists_check.query_result[0].count | int == 0
+  
+- name: Include tasks for creating users and granting privileges
+  ansible.builtin.include_tasks:
+    file: user_privileges.yml
+  when: table_creation_status is defined and table_creation_status is changed

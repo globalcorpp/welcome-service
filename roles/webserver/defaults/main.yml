@@ -1,0 +1,14 @@
+    php_version: '8.2'
+    httpd_service: httpd
+    http_port: 80
+    php_extensions:
+      - php-cli
+      - php-fpm
+      - php-common
+      - php-pgsql
+      - php-mbstring
+      - php-xml
+      #- php-gd
+      - php-json
+      #- php-zip
+      - php-opcache

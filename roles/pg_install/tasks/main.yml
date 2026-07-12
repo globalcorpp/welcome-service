@@ -1,0 +1,40 @@
+---
+- name: Install PostgreSQL Repository - PGDG
+  ansible.builtin.dnf:
+    name: "{{ pg_repo_url }}"
+    state: present
+    disable_gpg_check: true
+
+- name: Uninstall all PostgreSQL 17 packages (If present) /var/lib/pgsql/17 0kb
+  ansible.builtin.dnf:
+    name:
+      - postgresql17-server
+      - postgresql17-libs
+      - postgresql17
+    state: absent
+  ignore_errors: true
+
+- name: Install PostgreSQL Packages and Python Adapter
+  ansible.builtin.dnf:
+    name:
+      - "postgresql{{ pg_version }}-server"
+      - "postgresql{{ pg_version }}"
+      - python3-psycopg2
+    state: present
+
+- name: Initialize Database Cluster
+  ansible.builtin.shell:
+    cmd: "/usr/pgsql-{{ pg_version }}/bin/postgresql-{{ pg_version }}-setup initdb"
+  args:
+    creates: "{{ pg_config_path }}"
+
+- name: Start and Enable PostgreSQL Service
+  ansible.builtin.service:
+    name: "{{ pg_service_name }}"
+    state: started
+    enabled: true
+
+- name: Set Postgres Superuser Password
+  ansible.builtin.shell:
+    cmd: "sudo -u postgres psql -c \"ALTER USER postgres WITH PASSWORD '{{ pg_superuser_password }}';\""
+  changed_when: true

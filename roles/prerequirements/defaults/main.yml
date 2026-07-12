@@ -1,0 +1,6 @@
+---
+required_packages:
+  - net-tools
+  # - vim
+  # - htop # need EPEL Repo
+  # - epel-release

@@ -1,0 +1,13 @@
+---
+
+- name: Ensure all required prerequisite packages are installed
+  ansible.builtin.dnf:
+    # Pass the list of packages directly to the 'name' parameter
+    name: "{{ required_packages }}"
+    state: present
+
+- name: Display installation results and confirmation
+  ansible.builtin.debug:
+    msg: |
+          Prerequisite and Python library installation complete. 
+          The following packages were targeted: {{ required_packages }}.

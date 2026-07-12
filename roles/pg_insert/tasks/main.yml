@@ -1,0 +1,33 @@
+  
+- name: Get current row count
+  community.postgresql.postgresql_query:
+    login_db: "{{ target_db_name }}"
+    login_user: "{{ db_user_rw }}"
+    login_password: "{{ db_pass_rw }}"
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    query: "SELECT COUNT(*)::int AS count FROM {{ target_table_name }};"
+  register: row_count_result
+  changed_when: false
+
+- name: Calculate next row number 
+  ansible.builtin.set_fact:
+    next_row_number: "{{ (row_count_result.query_result[0].count | int) + 1 }}"
+
+- name: Format description text 
+  ansible.builtin.set_fact:
+    new_description_text: "{{ base_description_text }} #{{ next_row_number }}"
+
+- name: Insert new row
+  community.postgresql.postgresql_query:
+    login_db: "{{ target_db_name }}"
+    login_user: "{{ db_user_rw }}"
+    login_password: "{{ db_pass_rw }}"
+    login_host: "{{ db_host }}"
+    login_port: "{{ global_pg_port }}"
+    query: "INSERT INTO {{ target_table_name }} (description) VALUES ('{\"message\": \"{{ new_description_text }}\"}');"
+
+- name: Display Confirmation
+  ansible.builtin.debug:
+    msg: "Success! Inserted row #{{ next_row_number }} into {{ target_db_name }}."
+

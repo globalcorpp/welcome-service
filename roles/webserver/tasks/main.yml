@@ -1,0 +1,47 @@
+---
+    - name: Install Extra Packages for Enterprise Linux (EPEL) Repository
+      ansible.builtin.dnf:
+        name: epel-release
+        state: present
+
+    - name: Install Remi Repository
+      ansible.builtin.dnf:
+        name: "https://rpms.remirepo.net/enterprise/remi-release-{{ global_rhel_major_version }}.rpm"
+        state: present
+        disable_gpg_check: true
+
+    - name: Clean DNF Metadata Cache
+      ansible.builtin.command:
+        cmd: "dnf clean all"
+
+    - name: Reset the default 'php' module stream
+      # We reset the core 'php' module stream and rely on the 'enablerepo' flag in the next step.
+      ansible.builtin.command:
+        cmd: "dnf module reset -y php"
+      # Ignore error if the php module stream isn't present, which is common
+      ignore_errors: true 
+
+    - name: Install PHP and required extensions from Remi repository
+      ansible.builtin.dnf:
+        name: "{{ php_extensions }}"
+        state: present
+        # Dynamically set the repository name to 'remi-php82' (for php_version 8.2) 
+        # to match Remi's naming convention for direct package installation.
+        enablerepo: "remi-php{{ php_version | replace('.', '') }}"
+
+    - name: Start and enable PHP-FPM service -FastCGI Process Manager
+      ansible.builtin.service:
+        name: php-fpm
+        state: started
+        enabled: true
+
+    - name: Install Apache HTTP Server (httpd)
+      ansible.builtin.dnf:
+        name: "{{ httpd_service }}"
+        state: present
+
+    - name: Ensure Apache (httpd) is installed and running
+      ansible.builtin.service:
+        name: "{{ httpd_service }}"
+        state: started
+        enabled: true
