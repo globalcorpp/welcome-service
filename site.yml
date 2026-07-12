@@ -1,0 +1,41 @@
+---
+- name: Ansible connections check
+  hosts: all
+  become: true # Execute tasks with root privileges
+  roles:
+    - role: pingpong
+      tags: [pingpong]
+
+- name: Install Essential Prerequisite Packages and Python Libraries
+  hosts: all
+  become: true
+  roles:
+    - role: prerequirements
+      tags: [essential]
+
+- name: Deploy PostgreSQL Infrastructure and Data
+  hosts: db
+  become: true
+  roles:
+    - role: pg_install
+      tags: [pg_install]  
+
+    - role: pg_schema
+      tags: [pg_schema]
+
+    - role: pg_insert
+      tags: [pg_insert]
+
+- name: Install and Configure PHP for Apache on Rocky Linux
+  hosts: webserver
+  become: true
+  roles:
+    - role: webserver
+      tags: [webserver]
+
+- name: Deploy PHP script and test PostgreSQL connectivity via HTTP
+  hosts: webserver
+  become: true
+  roles:
+    - role: app
+      tags: [app]

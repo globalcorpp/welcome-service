@@ -1,0 +1,10 @@
+---
+# --- Global PostgreSQL Settings ---
+# We define these here so roles use the exact same credentials.
+global_pg_version: '15'
+global_pg_superuser: 'postgres'
+global_pg_superuser_password: 'a@1234' # In production, use ansible-vault!
+global_pg_port: 5432
+global_pg_dbname: 'gd_db'
+
+global_rhel_major_version: '10'
