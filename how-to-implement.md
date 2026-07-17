@@ -3,13 +3,21 @@ rocky linux 10 Generic Cloud-Base
 sudo apt install virt-manager
 sudo apt install virtinst libguestfs-tools virt-top bridge-utils
 
-virt-sysprep -a Rocky-10-GenericCloud-Base.latest.x86_64.qcow2 --run-command 'useradd saeed' --run-command 'usermod -aG wheel saeed' --run-command 'echo "a@1234" | passwd --stdin saeed ' --selinux-relabel
+sudo virt-sysprep -a Rocky-10-GenericCloud-Base.latest.x86_64.qcow2 --run-command 'useradd saeed' --run-command 'usermod -aG wheel saeed' --run-command 'echo "a@1234" | passwd --stdin saeed ' --selinux-relabel
 
 virsh net-list 
 virsh net-dhcp-leases default
 
 ssh-keygen -t rsa -b 4096 -C "gd"
 ssh-copy-id user@target_server_ip
+
+ssh-copy-id -i /path/to/your/custom_key.pub user@target_server_ip
+ssh -i /path/to/your/custom_key.pub user@target_server_ip
+
+// Ed25519
+ssh-keygen -t ed25519 -C "saeed-personal-laptop"
+// Key fingerprint
+ssh-keygen -lf ~/.ssh/authorized_keys
 
 psql -h localhost -p 5432 -U postgres
 \l
