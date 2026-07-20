@@ -1,5 +1,5 @@
-pg_host: "127.0.0.1"
-pg_user_ro: "gameduell-view"
+pg_host: "192.168.122.117"
+pg_user_ro: "gd-view"
 pg_password_ro: "a@1234view"
 web_root: "/var/www/html"
 script_name: "get_data.php"

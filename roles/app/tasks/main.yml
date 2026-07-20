@@ -40,4 +40,4 @@
 
     - name: Display the retrieved JSON data
       ansible.builtin.debug:
-        msg: "Retrieved Data:\n{{ api_response.content }}"
+        var: api_response.content | from_json

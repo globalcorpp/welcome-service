@@ -1,8 +1,11 @@
 ---
 # Connection Params
-db_host: 127.0.0.1
+db_host: 192.168.122.117
 db_user_rw: "gd"
 db_pass_rw: "a@1234"
+
+db_user_admin: "{{ global_pg_superuser }}"
+db_pass_admin: "{{ global_pg_superuser_password }}"
 
 # DB Params
 target_db_name: "{{ global_pg_dbname }}"

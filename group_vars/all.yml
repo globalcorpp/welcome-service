@@ -7,4 +7,6 @@ global_pg_superuser_password: 'a@1234' # In production, use ansible-vault!
 global_pg_port: 5432
 global_pg_dbname: 'gd_db'
 
+global_pg_password: 'a@1234'
+
 global_rhel_major_version: '10'

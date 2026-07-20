@@ -28,7 +28,8 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $target_id = (int)$_GET['id'];
     
     // Use pg_query_params for security (prevents SQL injection)
-    $query = "SELECT id, description FROM gameduell_data WHERE id = $1";
+    // $query = "SELECT id, description FROM gd_data WHERE id = $1";
+    $query = "SELECT id, description->>'message' AS message FROM gd_data ٌآًٍٍWHERE id = $1";
     $result = pg_query_params($db_connection, $query, array($target_id));
     
     if ($result && pg_num_rows($result) > 0) {
@@ -39,7 +40,8 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
 } else {
     // --- GET ALL QUERY (No ID parameter found) ---
-    $query = "SELECT id, description FROM gameduell_data ORDER BY id ASC";
+    // $query = "SELECT id, description FROM gd_data ORDER BY id ASC";
+    $query = "SELECT id, description->>'message' AS message FROM gd_data ORDER BY id ASC";
     $result = pg_query($db_connection, $query);
 
     if ($result) {
@@ -51,7 +53,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 if ($data) {
     respond_json($data); // 200 OK
 } else {
-    // Only happens if "get all" query runs but returns 0 rows.gameduell_data
+    // Only happens if "get all" query runs but returns 0 rows.gd_data
     respond_json(["message" => "No data found in the table."], 200); 
 }
 
