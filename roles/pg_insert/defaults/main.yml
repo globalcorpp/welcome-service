@@ -1,7 +1,6 @@
 ---
 # Connection Params
-# db_host: 127.0.0.1
-db_host: 192.168.122.117
+db_host: "{{ ansible_default_ipv4.address }}"
 db_user_rw: "gd"
 db_pass_rw: "a@1234"
 
