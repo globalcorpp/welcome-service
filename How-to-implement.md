@@ -27,11 +27,15 @@ psql -h localhost -p 5432 -U postgres
 \l
 \c gd_db
 SELECT * FROM gd_data;
-sudo -u postgres psql -d gd_db -c "TRUNCATE gd_data RESTART IDENTITY;"
-sudo -u postgres psql -d gd_db -c "DROP TABLE gd_data;"
+TRUNCATE gd_data RESTART IDENTITY;
+DROP TABLE gd_data;
 
-https://192.168.122.48:9090/
-http://192.168.122.48/get_data.php?id=1
+psql -h X.X.X.X -U postgres -d gd_db -c "TRUNCATE gd_data RESTART IDENTITY;"
+psql -h X.X.X.X -U postgres -d gd_db -c "DROP TABLE gd_data;"
+psql -h X.X.X.X -U postgres -d gd_db -c "SELECT count(*) FROM gd_data;"
+
+https://YOUR_IP:9090/
+http://YOUR_IP/get_data.php?id=1
 
 
 ansible-playbook site.yml -K --private-key /app/gd/gd
